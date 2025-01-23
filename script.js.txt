@@ -1,0 +1,81 @@
+const form = document.getElementById('marks-form');
+const chartContainer = document.getElementById('performance-chart');
+const syllabusForm = document.getElementById('syllabus-form');
+const plannerOutput = document.getElementById('planner-output');
+
+const subjects = [];
+const marks = [];
+
+// নম্বর ইনপুট এবং চার্ট আপডেট
+form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const subject = document.getElementById('subject').value;
+    const mark = parseInt(document.getElementById('marks').value);
+
+    subjects.push(subject);
+    marks.push(mark);
+
+    updateChart();
+    document.getElementById('subject').value = '';
+    document.getElementById('marks').value = '';
+});
+
+// চার্ট আপডেট ফাংশন
+function updateChart() {
+    chartContainer.innerHTML = ''; // Clear previous chart
+    const canvas = document.createElement('canvas');
+    chartContainer.appendChild(canvas);
+
+    new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: subjects,
+            datasets: [{
+                label: 'Marks',
+                data: marks,
+                backgroundColor: marks.map(mark => mark < 50 ? 'red' : 'green'),
+            }],
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true },
+            },
+        },
+    });
+}
+
+// ডেইলি প্ল্যানার জেনারেট
+syllabusForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const syllabusInput = document.getElementById('syllabus').value.split(',');
+    const totalDays = parseInt(document.getElementById('days').value);
+
+    const dailyPlanner = generatePlanner(syllabusInput, totalDays);
+
+    displayPlanner(dailyPlanner);
+});
+
+// প্ল্যানার তৈরি ফাংশন
+function generatePlanner(syllabus, days) {
+    const dailyTasks = [];
+    const tasksPerDay = Math.ceil(syllabus.length / days);
+
+    for (let i = 0; i < days; i++) {
+        dailyTasks.push(syllabus.slice(i * tasksPerDay, (i + 1) * tasksPerDay));
+    }
+
+    return dailyTasks;
+}
+
+// প্ল্যানার দেখানোর ফাংশন
+function displayPlanner(planner) {
+    plannerOutput.innerHTML = '<h3>Your Daily Plan:</h3>';
+    planner.forEach((tasks, index) => {
+        const day = document.createElement('div');
+        day.innerHTML = <strong>Day ${index + 1}:</strong> ${tasks.join(', ')};
+        plannerOutput.appendChild(day);
+    });
+}
